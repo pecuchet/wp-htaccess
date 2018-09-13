@@ -1,6 +1,9 @@
-# WordPress server configurations
+# WordPress htaccess boilerplate for Apache 2.4
 
-Some Apache/Nginx settings and boilerplate files for WordPress
+See also:  
+- [Creare/WP-htaccess](https://github.com/Creare/WP-htaccess/blob/master/.htaccess)
+- [roots/wp-h5bp-htaccess](https://github.com/roots/wp-h5bp-htaccess/blob/master/h5bp-htaccess.conf)
+
 
 ## Disabling access log for specific file types
 ```
