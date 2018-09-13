@@ -1,0 +1,98 @@
+Options All -Indexes -FollowSymLinks +SymLinksIfOwnerMatch
+SetEnv TZ Europe/Brussels
+ServerSignature Off
+
+# Recognise SSL when set at a load balancer/proxy level (for CloudFlare)
+SetEnvIf X-Forwarded-Proto https HTTPS=on
+
+# Only allow specific ips
+# Require all denied
+# Require ip xxx.xxx.xxx.xxx
+
+# Deny access to backups, config files, logs etc
+<FilesMatch "\.(html|txt|git*|docker*|env*|md|yml|ini|log|psd|sh|sql|swp)$">
+    Require all denied
+</FilesMatch>
+
+# Prevent access to files in root
+# (wp-config.php can also be moved one directory up)
+<FilesMatch "^(\.htaccess|readme.html|license.txt|wp-config.php)$">
+    Require all denied
+</FilesMatch>
+
+# Block access to include-only files
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^wp-admin/includes/ - [F,L]
+    RewriteRule !^wp-includes/ - [S=3]
+    RewriteRule ^wp-includes/[^/]+\.php$ - [F,L]
+    RewriteRule ^wp-includes/js/tinymce/langs/.+\.php - [F,L]
+    RewriteRule ^wp-includes/theme-compat/ - [F,L]
+</IfModule>
+
+# Remove some headers
+<IfModule mod_headers.c>
+    Header unset X-Powered-By
+    Header unset ETag
+</IfModule>
+
+# Turn off eTags - use expires below
+FileETag None
+
+# Set Expires headers
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresDefault                                    "access plus 1 month"
+
+    # Data interchange
+    ExpiresByType application/json                    A1
+    ExpiresByType application/xml                     A1
+    ExpiresByType text/xml                            A1
+
+    # Favicon (cannot be renamed!)
+    ExpiresByType image/x-icon                        "access plus 1 month"
+
+    # HTML
+    ExpiresByType text/html                           A1
+
+    # JavaScript & CSS
+    ExpiresByType application/javascript              "access plus 1 month"
+     ExpiresByType text/css                           "access plus 1 month"
+
+    # Manifest files
+    ExpiresByType application/x-web-app-manifest+json "access plus 1 month"
+    ExpiresByType text/cache-manifest                 "access plus 1 month"
+
+    # Media
+    ExpiresByType audio/ogg                           "access plus 1 month"
+    ExpiresByType image/gif                           "access plus 1 month"
+    ExpiresByType image/jpeg                          "access plus 1 month"
+    ExpiresByType image/png                           "access plus 1 month"
+    ExpiresByType video/mp4                           "access plus 1 month"
+    ExpiresByType video/ogg                           "access plus 1 month"
+    ExpiresByType video/webm                          "access plus 1 month"
+
+    # Web feeds
+    ExpiresByType application/atom+xml                "access plus 1 hour"
+    ExpiresByType application/rss+xml                 "access plus 1 hour"
+
+    # Web fonts
+    ExpiresByType application/font-woff2              "access plus 1 month"
+    ExpiresByType application/font-woff               "access plus 1 month"
+    ExpiresByType application/vnd.ms-fontobject       "access plus 1 month"
+    ExpiresByType application/x-font-ttf              "access plus 1 month"
+    ExpiresByType font/opentype                       "access plus 1 month"
+    ExpiresByType image/svg+xml                       "access plus 1 month"
+</IfModule>
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
